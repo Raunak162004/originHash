@@ -195,8 +195,8 @@ const resetPassword = async (req, res) => {
   if (!user) return res.status(400).json({ message: 'Token expired or invalid' });
 
   user.password = newPassword;
-  user.resetToken = null;
-  user.resetTokenExpires = null;
+  user.resetPasswordToken = null;
+  user.resetPasswordExpiry = null;
   await user.save();
 
   res.json({ message: 'Password reset successful' });
