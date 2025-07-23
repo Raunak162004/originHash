@@ -49,7 +49,7 @@ const registerUser = async (req, res) => {
 
     // send token to user via email
 
-    const verificationLink = `https://originhash.onrender.com/api/v1/users/verify/${token}`;
+    const verificationLink = `https://origin-hash.vercel.app/verify/${token}`;
 
     await sendEmail({
       to: user.email,
