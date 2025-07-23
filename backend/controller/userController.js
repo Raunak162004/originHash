@@ -171,7 +171,7 @@ const forgotPassword = async (req, res) => {
   user.resetPasswordExpiry = Date.now() + 60 * 60 * 1000; // 1 hour
   await user.save();
 
-  const resetLink = `https://originhash.onrender.com/api/v1/users/reset-password/${resetToken}`;
+  const resetLink = `https://origin-hash.vercel.app/reset-password/${resetToken}`;
 
   await sendEmail({
     to: user.email,
