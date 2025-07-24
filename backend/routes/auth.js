@@ -18,8 +18,7 @@ router.get(
     failureRedirect: "https://origin-hash.vercel.app/",
   }),
   async (req, res) => {
-    const { _json } = req.user;
-    const { email, name } = _json;
+    const { email, name } = req.user;
 
     try {
       const existingUser = await User.findOne({ email });

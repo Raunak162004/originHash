@@ -16,7 +16,12 @@ const PORT = process.env.PORT || 3000;
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/auth.js";
 
-app.use(cors());
+app.use(cors({
+  origin: "https://origin-hash.vercel.app/",
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+}));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
