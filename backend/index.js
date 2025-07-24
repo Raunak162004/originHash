@@ -2,6 +2,9 @@ import express from "express";
 import dotenv from "dotenv";
 import db from "./utils/db.js";
 import cors from "cors";
+import session from "express-session";
+import passport from "passport";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 
@@ -10,17 +13,27 @@ const PORT = process.env.PORT || 3000;
 
 // import all routes
 import userRoutes from "./routes/userRoutes.js";
-import cookieParser from "cookie-parser";
+import authRoutes from "./routes/auth.js";
 
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+app.use(session({
+  secret: 'some_secret_key',
+  resave: false,
+  saveUninitialized: true,
+}));
+
+// Passport middlewares
+app.use(passport.initialize());
+app.use(passport.session());
 
 // connect to MongoDB
 db();
 
 app.use("/api/v1/users", userRoutes);
+app.use('/api/v1/auth', authRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
