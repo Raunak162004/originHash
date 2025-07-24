@@ -1,7 +1,7 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import User from "../models/userModel.js";
 import dotenv from "dotenv";
+
 dotenv.config();
 
 passport.use(
@@ -12,33 +12,17 @@ passport.use(
       callbackURL: process.env.GOOGLE_CALLBACK_URL,
     },
     async (accessToken, refreshToken, profile, done) => {
-      try {
-        const email = profile.emails[0].value;
-
-        const user = await User.findOne({ email });
-
-        if (!user) {
-          // prevent auto-registration
-          return done(null, false, { message: "User not registered" });
-        }
-
-        return done(null, user);
-      } catch (err) {
-        return done(err, null);
-      }
+      // Always pass the profile to the next step
+      return done(null, profile);
     }
   )
 );
 
+// Only serialize the profile ID (or email if you want)
 passport.serializeUser((user, done) => {
-  done(null, user.id);
+  done(null, user);
 });
 
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findById(id);
-    done(null, user);
-  } catch (err) {
-    done(err, null);
-  }
+passport.deserializeUser((user, done) => {
+  done(null, user);
 });
