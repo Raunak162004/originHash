@@ -95,32 +95,55 @@ const verifyUser = async (req, res) => {
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
-  // basic input check
   if (!email || !password) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
   try {
-    // find user
     const user = await User.findOne({ email });
+
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    // block unverified users
+    // Block unverified users
     if (!user.isVerified) {
       return res.status(403).json({
         message: "Email not verified. Please verify your account first.",
       });
     }
 
-    // check password
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) {
+    // Check if account is locked
+    if (user.lockUntil && user.lockUntil > Date.now()) {
+      const minutesLeft = Math.ceil((user.lockUntil - Date.now()) / (60 * 1000));
+      return res.status(403).json({
+        message: `Too many failed attempts. Try again in ${minutesLeft} minute(s).`,
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      user.loginAttempts = (user.loginAttempts || 0) + 1;
+
+      // Lock the account if more than 5 attempts
+      if (user.loginAttempts >= 5) {
+        user.lockUntil = Date.now() + 60 * 60 * 1000; // lock for 1 hour
+        await user.save();
+        return res.status(403).json({
+          message: "Too many failed attempts. Account locked for 1 hour.",
+        });
+      }
+
+      await user.save();
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    // generate JWT token
+    // Successful login, reset attempts
+    user.loginAttempts = 0;
+    user.lockUntil = undefined;
+    await user.save();
+
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
