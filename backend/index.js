@@ -17,7 +17,7 @@ import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/auth.js";
 
 app.use(cors({
-  origin: "https://origin-hash.vercel.app/",
+  origin: "https://origin-hash.vercel.app",
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
