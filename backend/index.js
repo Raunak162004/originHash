@@ -15,6 +15,7 @@ const PORT = process.env.PORT || 3000;
 // import all routes
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/auth.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 // app.use(cors({
 //   origin: "https://origin-hash.vercel.app",
@@ -43,6 +44,7 @@ db();
 
 app.use("/api/v1/users", userRoutes);
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
