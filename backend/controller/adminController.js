@@ -1,4 +1,3 @@
-// controllers/adminController.js
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Admin from "../models/adminModel.js";
@@ -9,34 +8,43 @@ export const loginAdminOrSuperAdmin = async (req, res) => {
   try {
     let user;
 
-    // SuperAdmin login
-    if (userId && password1 && password2) {
+    // ✅ SuperAdmin login
+    const isSuperAdminLogin =
+      typeof userId === "string" && userId.trim() !== "" &&
+      typeof password1 === "string" && password1.trim() !== "" &&
+      typeof password2 === "string" && password2.trim() !== "";
+
+    if (isSuperAdminLogin) {
       user = await Admin.findOne({ userId, isSuperAdmin: true });
       if (!user) return res.status(401).json({ message: "Invalid credentials" });
 
       const pass1Match = password1 === user.password1;
       const pass2Match = password2 === user.password2;
+
       if (!pass1Match || !pass2Match)
         return res.status(401).json({ message: "Invalid credentials" });
 
-    } else if (username && password) {
-      // Admin login
-      // console.log(username);
+    } else if (typeof username === "string" && username.trim() !== "" &&
+               typeof password === "string" && password.trim() !== "") {
+      // ✅ Admin login
       user = await Admin.findOne({ username, isSuperAdmin: false });
       if (!user) return res.status(401).json({ message: "Invalid credentials" });
-
-      console.log("idhar tak aaya");
 
       const passMatch = password === user.password;
       if (!passMatch)
         return res.status(401).json({ message: "Invalid credentials" });
+
     } else {
+      // ❌ Missing or incomplete login fields
       return res.status(400).json({ message: "Incomplete login credentials" });
     }
 
-    const token = jwt.sign({ id: user._id, isSuperAdmin: user.isSuperAdmin }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
+    // ✅ JWT Token generation
+    const token = jwt.sign(
+      { id: user._id, isSuperAdmin: user.isSuperAdmin },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
 
     return res.status(200).json({
       message: "Login successful",
