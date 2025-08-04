@@ -5,6 +5,9 @@ import cors from "cors";
 import session from "express-session";
 import passport from "passport";
 import cookieParser from "cookie-parser";
+import path from "path";
+import { fileURLToPath } from "url";
+
 import "./config/passport.js" // Import passport configuration
 
 dotenv.config();
@@ -12,10 +15,15 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // import all routes
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/adminRoutes.js";
+
+import certRoutes from "./routes/certRoutes.js";
 
 // app.use(cors({
 //   origin: "https://origin-hash.vercel.app",
@@ -42,9 +50,12 @@ app.use(passport.session());
 // connect to MongoDB
 db();
 
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 app.use("/api/v1/users", userRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use("/api/v1/certs", certRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
