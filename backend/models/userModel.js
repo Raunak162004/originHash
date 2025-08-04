@@ -9,10 +9,10 @@ const userSchema = new mongoose.Schema({
     unique: true,
     lowercase: true,
   },
-  password: String,
+  password: String, // todo ->  jod schema for input validation
   role: {
     type: String,
-    enum: ['admin', 'individual', 'corporate'],
+    enum: ['other', 'individual', 'corporate'],
     default: 'individual',
   },
   isVerified: {
