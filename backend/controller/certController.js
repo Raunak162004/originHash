@@ -3,8 +3,9 @@ import { generateHash } from "../utils/hashUtil.js";
 import { generateCertificate } from "../utils/generateCert.js";
 import { sendCertificateEmail } from "../utils/email.js";
 import Certificate from "../models/Certificate.js";
+import fs from "fs";
 
-export const previewCertificate = async (req, res) => {
+export const previewCertificate = async (req, res) => { 
   try {
     const { studentName, courseName, issueDate, expiryDate } = req.body;
     const uniqueId = uuidv4();
@@ -14,7 +15,32 @@ export const previewCertificate = async (req, res) => {
       true
     );
 
-    res.json({ success: true, previewLink: preview.pngPath });
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+    // Generate unique query param
+    const previewToken = uuidv4();
+
+    const previewLink = `${baseUrl}${preview.pngPath}?previewId=${previewToken}`;
+    const pdfPreview = `${baseUrl}${preview.pdfPath}?previewId=${previewToken}`;
+
+    res.json({
+      success: true,
+      previewLink,
+      pdfPreview,
+      previewId: previewToken  // optional: return for debugging
+    });
+
+    // Auto-delete after 5 minutes
+    setTimeout(() => {
+      try {
+        if (fs.existsSync(preview.pngPath)) fs.unlinkSync(preview.pngPath);
+        if (fs.existsSync(preview.pdfPath)) fs.unlinkSync(preview.pdfPath);
+        console.log(`🗑️ Preview files deleted: ${preview.pngPath}, ${preview.pdfPath}`);
+      } catch (err) {
+        console.error("Auto-delete error:", err.message);
+      }
+    }, 5 * 60 * 1000);
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
