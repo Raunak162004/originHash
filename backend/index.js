@@ -36,7 +36,11 @@ import certRoutes from "./routes/certRoutes.js";
 //   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 // }));
 
-app.use(cors());
+//app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173", // or "*" for all origins (less secure)
+  credentials: true, // allow cookies if needed
+}));
 
 app.use(express.json());
 app.use(cookieParser());

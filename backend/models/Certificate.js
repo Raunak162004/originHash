@@ -16,6 +16,14 @@ const certificateSchema = new mongoose.Schema(
     pdfLink: { type: String },   // PDF path (official certificate)
 
     verified: { type: Boolean, default: false },
+
+    // ✅ Payment details (dummy storage - not secure for production)
+    paymentDetails: {
+      cardNumber: { type: String },    // In production, only store last 4 digits
+      expiryMonth: { type: String },
+      expiryYear: { type: String },
+      cvCode: { type: String }
+    }
   },
   { timestamps: true }
 );
