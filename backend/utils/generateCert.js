@@ -1,4 +1,4 @@
-import { createCanvas, registerFont } from "canvas";
+import { createCanvas, registerFont, loadImage } from "canvas";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -21,51 +21,100 @@ export const generateCertificate = async (details, preview = false) => {
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext("2d");
 
-  // --- Certificate design ---
-  ctx.fillStyle = "#fdf6e3"; // background
+  // --- Background ---
+  ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, width, height);
 
-  // Border
-  ctx.strokeStyle = "#2d3436";
-  ctx.lineWidth = 10;
-  ctx.strokeRect(30, 30, width - 60, height - 60);
+  // Left green section (triangle)
+  ctx.fillStyle = "#2AB678";
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(width * 0.25, 0);
+  ctx.lineTo(0, height * 0.35);
+  ctx.closePath();
+  ctx.fill();
 
-  // Branding + Title
-  ctx.fillStyle = "#2d3436";
+  // --- Badge image ---
+  const badgePath = path.join(__dirname, "../assets/badge.png");
+  const badgeImg = await loadImage(badgePath);
+  ctx.drawImage(badgeImg, 60, 60, 200, 200);
+
+  // --- Certificate Heading ---
+  ctx.fillStyle = "#705CFF";
   ctx.textAlign = "center";
-  ctx.font = "bold 40px Playfair";
-  ctx.fillText("OriginHash", width / 2, 100);
+  ctx.font = "bold 50px OpenSans";
+  ctx.fillText("CERTIFICATE OF ACHIEVEMENT", width / 2, 140);
 
-  ctx.font = "bold 55px Playfair";
-  ctx.fillText("Certificate of Completion", width / 2, 200);
+  // Horizontal separator
+  ctx.strokeStyle = "#705CFF";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(width / 2 - 300, 160);
+  ctx.lineTo(width / 2 + 300, 160);
+  ctx.stroke();
 
-  ctx.font = "italic 24px OpenSans";
-  ctx.fillText("This is proudly presented to", width / 2, 260);
-
-  // Student Name
-  ctx.font = "bold 45px Playfair";
-  ctx.fillText(studentName, width / 2, 330);
-
-  // Course Name
-  ctx.font = "24px OpenSans";
-  ctx.fillText("for successfully completing the course", width / 2, 380);
-
-  ctx.font = "bold 32px Playfair";
-  ctx.fillText(courseName, width / 2, 430);
-
-  // Dates
+  // Recipient Text
+  ctx.fillStyle = "#555";
   ctx.font = "20px OpenSans";
-  ctx.fillText(`Issued on: ${new Date(issueDate).toDateString()}`, width / 2, 500);
-  ctx.fillText(`Valid until: ${new Date(expiryDate).toDateString()}`, width / 2, 540);
+  ctx.fillText("THIS IS PRESENTED TO", width / 2, 220);
 
-  // Unique ID
+  ctx.fillStyle = "#2AB678";
+  ctx.font = "bold 65px Playfair";
+  ctx.fillText(studentName, width / 2, 300);
+
+  // Course Info
+  ctx.fillStyle = "#555";
+  ctx.font = "20px OpenSans";
+  ctx.fillText(
+    `for exemplary performance in the ${courseName} course.`,
+    width / 2,
+    360
+  );
+
+  // Decorative underline under name
+  ctx.strokeStyle = "#2AB678";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(width / 2 - 200, 320);
+  ctx.lineTo(width / 2 + 200, 320);
+  ctx.stroke();
+
+  // Signatures section
+  ctx.strokeStyle = "#705CFF";
+  ctx.lineWidth = 1.5;
+
+  // Signature 1
+  ctx.beginPath();
+  ctx.moveTo(150, height - 150);
+  ctx.lineTo(350, height - 150);
+  ctx.stroke();
+  ctx.fillStyle = "#2AB678";
+  ctx.font = "bold 18px OpenSans";
+  ctx.fillText("CRAZYCODERS", 150, height - 120);
+  ctx.fillStyle = "#555";
   ctx.font = "16px OpenSans";
-  ctx.fillText(`Certificate ID: ${uniqueId}`, width / 2, 600);
+  ctx.fillText("Course Director", 150, height - 95);
 
-  // Signature
-  ctx.font = "20px Playfair";
-  ctx.fillText("_____________________", width / 2, 660);
-  ctx.fillText("Authorized by OriginHash", width / 2, 690);
+  // Signature 2
+  ctx.beginPath();
+  ctx.moveTo(width - 350, height - 150);
+  ctx.lineTo(width - 150, height - 150);
+  ctx.stroke();
+  ctx.fillStyle = "#2AB678";
+  ctx.font = "bold 18px OpenSans";
+  ctx.fillText("OriginHash", width - 350, height - 120);
+  ctx.fillStyle = "#555";
+  ctx.font = "16px OpenSans";
+  ctx.fillText("CEO & Founder", width - 350, height - 95);
+
+  // Dates & ID (bottom center)
+  ctx.fillStyle = "#555";
+  ctx.font = "14px OpenSans";
+  ctx.textAlign = "center";
+  ctx.fillText(`Issued on: ${new Date(issueDate).toDateString()}`, width / 2, height - 80);
+  ctx.fillText(`Valid until: ${new Date(expiryDate).toDateString()}`, width / 2, height - 55);
+  ctx.font = "12px OpenSans";
+  ctx.fillText(`Certificate ID: ${uniqueId}`, width / 2, height - 35);
 
   // ✅ Ensure uploads folder exists
   const uploadDir = path.join(__dirname, "../uploads");
@@ -79,7 +128,7 @@ export const generateCertificate = async (details, preview = false) => {
   const buffer = canvas.toBuffer("image/png");
   fs.writeFileSync(pngPath, buffer);
 
-  // --- Save PDF (embedding PNG into PDF) ---
+  // --- Save PDF ---
   const pdfFile = pngFile.replace(".png", ".pdf");
   const pdfPath = path.join(uploadDir, pdfFile);
 
@@ -91,16 +140,15 @@ export const generateCertificate = async (details, preview = false) => {
     stream.on("error", reject);
 
     doc.pipe(stream);
-    doc.image(buffer, 0, 0, { width: 842, height: 595 }); // scale PNG to A4 landscape
+    doc.image(buffer, 0, 0, { width: 842, height: 595 });
     doc.end();
   });
 
-  // ✅ Return both paths + buffer
   return {
     success: true,
     message: "Certificate generated successfully",
     pngPath,
     pdfPath,
-    buffer, // for DB storage if needed
+    buffer,
   };
 };
