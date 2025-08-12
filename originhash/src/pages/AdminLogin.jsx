@@ -49,7 +49,7 @@ const AdminLogin = () => {
         setLockoutTime(null);
 
         setTimeout(() => {
-          navigate("/admin/dashboard");
+          navigate("/admin/courses");
         }, 1000);
       } else {
         throw new Error("Invalid response from server");
