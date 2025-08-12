@@ -7,7 +7,7 @@ const certificateSchema = new mongoose.Schema(
     studentName: { type: String, required: true },
     courseName: { type: String, required: true },
     issueDate: { type: Date, required: true },
-    expiryDate: { type: Date, required: true },
+    expiryDate: { type: Date, required: false },
     uniqueId: { type: String, required: true, unique: true },
     hash: { type: String, required: true },
 

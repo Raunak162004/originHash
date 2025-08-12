@@ -1,4 +1,5 @@
 import Certificate from "../models/Certificate.js";
+import path from "path";
 
 // ✅ Step 1: Verify Certificate by ID (before payment)
 export const verifyCertificate = async (req, res) => {
@@ -44,22 +45,23 @@ export const confirmPaymentAndVerify = async (req, res) => {
     const paymentStatus = "success"; // dummy payment always passes
 
     if (paymentStatus === "success") {
-      // 3️⃣ Mark certificate as verified
+      // 3️⃣ Mark as verified
       cert.verified = true;
 
-      // 4️⃣ Save payment details (dummy - for real apps, tokenize/encrypt this!)
+      // 4️⃣ Save payment details (dummy - mask sensitive data!)
       cert.paymentDetails = {
-        cardNumber,    // store only last 4 digits in production
+        cardNumber: `**** **** **** ${cardNumber.slice(-4)}`,
         expiryMonth,
         expiryYear,
-        cvCode
       };
 
       await cert.save();
 
+      const baseUrl = `${req.protocol}://${req.get("host")}`;
+
       return res.json({
         success: true,
-        message: "Dummy payment successful. Certificate verified and payment details stored.",
+        message: "Payment successful. Certificate verified.",
         cert: {
           studentName: cert.studentName,
           courseName: cert.courseName,
@@ -67,7 +69,12 @@ export const confirmPaymentAndVerify = async (req, res) => {
           expiryDate: cert.expiryDate,
           uniqueId: cert.uniqueId,
           verified: cert.verified,
-          paymentDetails: cert.paymentDetails
+          pngUrl: cert.imageLink
+            ? `${baseUrl}/uploads/${path.basename(cert.imageLink)}`
+            : null,
+          pdfUrl: cert.pdfLink
+            ? `${baseUrl}/uploads/${path.basename(cert.pdfLink)}`
+            : null,
         },
       });
     } else {
@@ -77,3 +84,4 @@ export const confirmPaymentAndVerify = async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 };
+

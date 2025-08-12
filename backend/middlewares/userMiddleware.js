@@ -23,7 +23,7 @@ export const userProtect = async (req, res, next) => {
       next();
     } catch (err) {
       console.error("User auth error:", err);
-      return res.status(401).json({ message: "Authentication failed" });
+      return res.status(401).json({ message: "Authentication failed, Please Login Again" });
     }
   } else {
     return res.status(401).json({ message: "No token, authorization denied" });

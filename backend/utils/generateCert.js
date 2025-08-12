@@ -39,45 +39,46 @@ export const generateCertificate = async (details, preview = false) => {
   const badgeImg = await loadImage(badgePath);
   ctx.drawImage(badgeImg, 60, 60, 200, 200);
 
-  // --- Certificate Heading ---
-  ctx.fillStyle = "#705CFF";
-  ctx.textAlign = "center";
-  ctx.font = "bold 50px OpenSans";
-  ctx.fillText("CERTIFICATE OF ACHIEVEMENT", width / 2, 140);
+// --- Certificate Heading ---
+ctx.fillStyle = "#1E6B4E"; // darker green
+ctx.textAlign = "center";
+ctx.font = "bold 50px OpenSans";
+ctx.fillText("CERTIFICATE OF ACHIEVEMENT", width / 2, 280); // moved lower
 
-  // Horizontal separator
-  ctx.strokeStyle = "#705CFF";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(width / 2 - 300, 160);
-  ctx.lineTo(width / 2 + 300, 160);
-  ctx.stroke();
+// Horizontal separator
+ctx.strokeStyle = "#1E6B4E";
+ctx.lineWidth = 2;
+ctx.beginPath();
+ctx.moveTo(width / 2 - 300, 300);
+ctx.lineTo(width / 2 + 300, 300);
+ctx.stroke();
 
-  // Recipient Text
-  ctx.fillStyle = "#555";
-  ctx.font = "20px OpenSans";
-  ctx.fillText("THIS IS PRESENTED TO", width / 2, 220);
+// Recipient Text
+ctx.fillStyle = "#555";
+ctx.font = "20px OpenSans";
+ctx.fillText("THIS IS PRESENTED TO", width / 2, 350);
 
-  ctx.fillStyle = "#2AB678";
-  ctx.font = "bold 65px Playfair";
-  ctx.fillText(studentName, width / 2, 300);
+// Recipient name
+ctx.fillStyle = "#2AB678";
+ctx.font = "bold 65px Playfair";
+ctx.fillText(studentName, width / 2, 430);
 
-  // Course Info
-  ctx.fillStyle = "#555";
-  ctx.font = "20px OpenSans";
-  ctx.fillText(
-    `for exemplary performance in the ${courseName} course.`,
-    width / 2,
-    360
-  );
+// Decorative underline under name
+ctx.strokeStyle = "#2AB678";
+ctx.lineWidth = 3;
+ctx.beginPath();
+ctx.moveTo(width / 2 - 200, 455);
+ctx.lineTo(width / 2 + 200, 455);
+ctx.stroke();
 
-  // Decorative underline under name
-  ctx.strokeStyle = "#2AB678";
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(width / 2 - 200, 320);
-  ctx.lineTo(width / 2 + 200, 320);
-  ctx.stroke();
+// Course Info
+ctx.fillStyle = "#555";
+ctx.font = "20px OpenSans";
+ctx.fillText(
+  `for exemplary performance in the ${courseName} course.`,
+  width / 2,
+  495
+);
 
   // Signatures section
   ctx.strokeStyle = "#705CFF";
@@ -90,10 +91,10 @@ export const generateCertificate = async (details, preview = false) => {
   ctx.stroke();
   ctx.fillStyle = "#2AB678";
   ctx.font = "bold 18px OpenSans";
-  ctx.fillText("CRAZYCODERS", 150, height - 120);
+  ctx.fillText("CRAZYCODERS", 250, height - 120);
   ctx.fillStyle = "#555";
   ctx.font = "16px OpenSans";
-  ctx.fillText("Course Director", 150, height - 95);
+  ctx.fillText("Course Director", 250, height - 95);
 
   // Signature 2
   ctx.beginPath();
@@ -102,17 +103,21 @@ export const generateCertificate = async (details, preview = false) => {
   ctx.stroke();
   ctx.fillStyle = "#2AB678";
   ctx.font = "bold 18px OpenSans";
-  ctx.fillText("OriginHash", width - 350, height - 120);
+  ctx.fillText("OriginHash", width - 250, height - 120);
   ctx.fillStyle = "#555";
   ctx.font = "16px OpenSans";
-  ctx.fillText("CEO & Founder", width - 350, height - 95);
+  ctx.fillText("CEO & Founder", width - 250, height - 95);
+
+const expiryDateText = expiryDate
+  ? `Valid until: ${new Date(expiryDate).toDateString()}`
+  : "Valid until: None";
 
   // Dates & ID (bottom center)
   ctx.fillStyle = "#555";
   ctx.font = "14px OpenSans";
   ctx.textAlign = "center";
   ctx.fillText(`Issued on: ${new Date(issueDate).toDateString()}`, width / 2, height - 80);
-  ctx.fillText(`Valid until: ${new Date(expiryDate).toDateString()}`, width / 2, height - 55);
+  ctx.fillText(`Valid until: ${expiryDateText}`, width / 2, height - 55);
   ctx.font = "12px OpenSans";
   ctx.fillText(`Certificate ID: ${uniqueId}`, width / 2, height - 35);
 
